@@ -14,9 +14,15 @@ const TokenManager = require('./tokenize/TokenManager');
 const AuthenticationsValidator = require('./validator/authentications');
 const AuthenticationsService = require('./services/postgres/authenticationsService');
 
+// tasks
+const tasks = require('./api/tasks');
+const TasksService = require('./services/postgres/tasksService');
+const TasksValidator = require('./validator/tasks');
+
 const init = async () => {
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
+  const tasksService = new TasksService();
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -34,7 +40,7 @@ const init = async () => {
     },
   ]);
 
-  server.auth.strategy('musicapp_jwt', 'jwt', {
+  server.auth.strategy('tasksapp_jwt', 'jwt', {
     keys: process.env.ACCESS_TOKEN_KEY,
     verify: {
       aud: false,
@@ -65,6 +71,13 @@ const init = async () => {
         usersService,
         tokenManager: TokenManager,
         validator: AuthenticationsValidator,
+      },
+    },
+    {
+      plugin: tasks,
+      options: {
+        service: tasksService,
+        validator: TasksValidator,
       },
     },
   ]);
